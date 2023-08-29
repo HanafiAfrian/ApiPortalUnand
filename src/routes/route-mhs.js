@@ -6,7 +6,4 @@ router.get('/mhs', mhs.getDataMhs);
 
 
 router.get('/mhs/:id', mhs.getDataMhsByID);
-
-
-
 module.exports = router;
