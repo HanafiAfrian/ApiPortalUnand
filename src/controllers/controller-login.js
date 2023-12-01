@@ -1,4 +1,4 @@
-const config = require('../configs/database');
+const config = require('../configs/dbportal');
 const mysql = require('mysql');
 const pool = mysql.createPool(config);
 
@@ -26,6 +26,7 @@ module.exports ={
                 res.send({ 
                     success: true, 
                     message: 'Succes',
+					   data: results 
                     
                 });
                 }
