@@ -1,0 +1,71 @@
+const config = require('../configs/dbsiateknik');
+const mysql = require('mysql');
+const pool = mysql.createPool(config);
+const {param, validationResult} = require("express-validator");
+
+pool.on('error',(err)=> {
+    console.error(err);
+});
+
+module.exports ={
+    getDataMataKuliahYangDitawarkan(req,res){
+        const errors = validationResult(req);
+        //console.log(errors);
+        if (!errors){{
+            return res.status(400).json({ error: errors.array(), success: false, message:errors.array()[0]['msg']});
+        }}
+
+        let kode_prodi = req.params.kodeprodi;
+        let semester = req.query.semester;
+        let ganjil_genap = req.query.ganjil_genap;
+        let semDB = semester.concat(ganjil_genap);
+
+        pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            connection.query(
+                `
+                SELECT 
+                a.vmktwkrsMkkurKode AS Kode,
+                a.vmktwkrsMkkurNamaResmi AS MataKuliah,
+                CASE
+                        WHEN c.pegGelarBelakang = '' THEN
+                            CONCAT_WS(' ', c.pegGelarDepan, c.pegNama)
+                        ELSE
+                            CONCAT_WS(' ', c.pegGelarDepan, CONCAT_WS(', ', c.pegNama, c.pegGelarBelakang))
+                    END AS NamaDosen,
+                a.vmktwkrsKlsNama AS Kelas,
+                a.vmktwkrsSifatMatakuliahKrs AS WajibAtauPilihan,
+                a.vmktwkrsJumlahSksKrs AS SKS
+
+
+                FROM 
+                s_v_matakuliah_ditawarkan_krs AS a
+                JOIN s_dosen_kelas AS b ON b.dsnkKlsId = a.vmktwkrsKlsId
+                JOIN pegawai AS c ON b.dsnkDsnPegNip = c.PegNip
+                
+                WHERE vmktwkrsSemId=? AND (vmktwkrsProdiKode=? OR vmktwkrsMkkurSfmkrKode= 'P');
+
+                `
+            , [semDB, kode_prodi],
+
+            function (error, results) {
+                //console.log(error);
+                if(error) throw error;  
+                     if (results.length > 0) {
+                res.send({ 
+                    success: true, 
+                    message: 'Data di Temukan',
+                    data: results
+                });
+                }
+                   else {
+                    res.send({ 
+                    success: false, 
+                    message: 'Data Tidak ditemukan',
+                });
+                    }
+            });
+            connection.release();
+        })
+    }
+}

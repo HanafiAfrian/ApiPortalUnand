@@ -12,6 +12,8 @@ app.use('/', login);
 const mhs = require('./src/routes/route-mhs');
 app.use('/', mhs);
 
+const matkul = require('./src/routes/route-matkul');
+app.use('/', matkul);
 
 app.listen(3000, ()=>{
     console.log('Server Berjalan di Port : 3000');

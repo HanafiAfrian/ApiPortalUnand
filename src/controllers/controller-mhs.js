@@ -19,7 +19,7 @@ module.exports ={
                 if(error) throw error;  
                 res.send({ 
                     success: true, 
-                    message: 'Data DI Temukan',
+                    message: 'Data Di Temukan',
                     data: results 
                 });
             });
@@ -107,74 +107,20 @@ module.exports ={
     
     getKodeProdi(req, res){
         let id = req.params.id;
+        console.log(req.query);
         pool.getConnection(function(err, connection) {
             if (err) throw err;
             connection.query(
                 `
-                
+                SELECT mhsProdiKode FROM mahasiswa WHERE mhsNiu = ?;            
                 `
-            , function (error, results) {
+            , [id], function (error, results) {
                 if(error) throw error;  
                 res.send({ 
                     success: true, 
-                    message: 'Data DI Temukan',
+                    message: 'Data Di Temukan',
                     data: results 
                 });
-            });
-            connection.release();
-        })
-    },
-
-    getDataMataKuliahYangDitawarkan(req,res){
-        let id = req.params.id;
-        pool.getConnection(function(err, connection) {
-            if (err) throw err;
-            connection.query(
-                `
-             SELECT mahasiswa.mhsNiu AS mhsNiu, mahasiswa.mhsNama AS mhsNama, mahasiswa.mhsAlamatMhs AS mhsAlamatMhs,
-              mahasiswa.mhsKotaKodeLahir AS mhsKotaKodeLahir, mahasiswa.mhsTanggalLahir AS mhsTanggalLahir ,
-               agama_ref.agmrNama AS agmrNama , mahasiswa.mhsJenisKelamin AS mhsJenisKelamin , 
-               kota.kotaNamaResmi AS kotaNamaResmi, mahasiswa.mhsTanggalTerdaftar AS mhsTanggalTerdaftar ,
-                program_studi.prodSELECT 
-                a.vmktwkrsMkkurKode AS Kode,
-                a.vmktwkrsMkkurNamaResmi AS MataKuliah,
-                CASE
-                        WHEN c.pegGelarBelakang = '' THEN
-                            CONCAT_WS(' ', c.pegGelarDepan, c.pegNama)
-                        ELSE
-                            CONCAT_WS(' ', c.pegGelarDepan, CONCAT_WS(', ', c.pegNama, c.pegGelarBelakang))
-                    END AS NamaDosen,
-                a.vmktwkrsKlsNama AS Kelas,
-                a.vmktwkrsSifatMatakuliahKrs AS WajibAtauPilihan,
-                a.vmktwkrsJumlahSksKrs AS SKS
-                
-                
-                FROM 
-                's_v_matakuliah_ditawarkan_krs' AS a
-                JOIN s_dosen_kelas AS b ON b.dsnkKlsId = a.vmktwkrsKlsId
-                JOIN pegawai AS c ON b.dsnkDsnPegNip = c.PegNip
-                 
-                WHERE 'vmktwkrsSemId'="20231" AND ('vmktwkrsProdiKode'=71 OR 'vmktwkrsMkkurSfmkrKode'= "P") 
-                
-                `
-            , [id],
-
-            function (error, results) {
-                console.log(error);
-                if(error) throw error;  
-                     if (results.length > 0) {
-                res.send({ 
-                    success: true, 
-                    message: 'Data di Temukan',
-                    data: results
-                });
-                }
-                   else {
-                    res.send({ 
-                    success: false, 
-                    message: 'Data Tidak ditemukan '+id,
-                });
-                    }
             });
             connection.release();
         })
